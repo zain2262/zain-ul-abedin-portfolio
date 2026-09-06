@@ -571,26 +571,37 @@ document.addEventListener("DOMContentLoaded", () => {
        PROJECT SCREENSHOT GALLERY
     ===================================================== */
 
-    const galleryMainImage =
-        document.querySelector(".project-gallery-main img");
+    const projectGalleries =
+        document.querySelectorAll(".project-gallery");
 
-    const galleryThumbs =
-        document.querySelectorAll(".gallery-thumb[data-gallery-image]");
+    projectGalleries.forEach(gallery => {
 
-    galleryThumbs.forEach(thumb => {
+        const galleryMainImage =
+            gallery.querySelector(".project-gallery-main img");
 
-        thumb.addEventListener("click", () => {
+        const galleryThumbs =
+            gallery.querySelectorAll(".gallery-thumb[data-gallery-image]");
 
-            if (!galleryMainImage) return;
+        galleryThumbs.forEach(thumb => {
 
-            const image = thumb.getAttribute("data-gallery-image");
+            thumb.addEventListener("click", () => {
 
-            if (!image) return;
+                if (!galleryMainImage) return;
 
-            galleryMainImage.src = image;
+                const image =
+                    thumb.getAttribute("data-gallery-image");
 
-            galleryThumbs.forEach(item => item.classList.remove("active"));
-            thumb.classList.add("active");
+                if (!image) return;
+
+                galleryMainImage.src = image;
+
+                galleryThumbs.forEach(
+                    item => item.classList.remove("active")
+                );
+
+                thumb.classList.add("active");
+
+            });
 
         });
 

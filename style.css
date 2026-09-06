@@ -3535,3 +3535,16 @@ img {
         aspect-ratio: 16 / 11;
     }
 }
+
+
+/* =========================================================
+   MULTIPLE FEATURED PROJECTS
+========================================================= */
+
+.featured-project + .featured-project {
+    margin-top: 36px;
+}
+
+.cricket-project .project-gallery-main img {
+    object-position: top center;
+}

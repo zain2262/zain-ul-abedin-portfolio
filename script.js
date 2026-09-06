@@ -568,6 +568,37 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
     /* =====================================================
+       PROJECT SCREENSHOT GALLERY
+    ===================================================== */
+
+    const galleryMainImage =
+        document.querySelector(".project-gallery-main img");
+
+    const galleryThumbs =
+        document.querySelectorAll(".gallery-thumb[data-gallery-image]");
+
+    galleryThumbs.forEach(thumb => {
+
+        thumb.addEventListener("click", () => {
+
+            if (!galleryMainImage) return;
+
+            const image = thumb.getAttribute("data-gallery-image");
+
+            if (!image) return;
+
+            galleryMainImage.src = image;
+
+            galleryThumbs.forEach(item => item.classList.remove("active"));
+            thumb.classList.add("active");
+
+        });
+
+    });
+
+
+
+    /* =====================================================
        COPY EMAIL
     ===================================================== */
 

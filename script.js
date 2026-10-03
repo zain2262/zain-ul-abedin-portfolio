@@ -798,3 +798,481 @@ document.addEventListener("DOMContentLoaded", () => {
     );
 
 });
+
+async function sendMessageToBot(message, sessionId) {
+    try {
+        const response = await fetch("https://zainn8n98.app.n8n.cloud/webhook/client-message", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                message: message,
+                sessionId: sessionId
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error("Failed to connect with chatbot");
+        }
+
+        const data = await response.json();
+
+        return data.reply;
+
+    } catch (error) {
+        console.error("Chatbot Error:", error);
+        return "Maazrat, abhi chatbot se connection nahi ho saka. Thori der baad try karein.";
+    }
+}
+
+/* =========================================
+   PREMIUM AI CHATBOT FUNCTIONALITY
+========================================= */
+
+document.addEventListener("DOMContentLoaded", () => {
+
+    const chatbotToggle = document.getElementById("chatbot-toggle");
+    const chatbotBox = document.getElementById("chatbot-box");
+    const chatbotClose = document.getElementById("chatbot-close");
+
+    const chatbotInput = document.getElementById("chatbot-input");
+    const chatbotSend = document.getElementById("chatbot-send");
+    const chatbotMessages = document.getElementById("chatbot-messages");
+
+    const suggestions = document.querySelectorAll(".chat-suggestion");
+
+
+    /* =========================================
+       SESSION ID
+    ========================================= */
+
+    let sessionId = localStorage.getItem("zain_chat_session");
+
+    if (!sessionId) {
+
+        sessionId =
+            "zain-" +
+            Date.now() +
+            "-" +
+            Math.random()
+                .toString(36)
+                .substring(2, 10);
+
+        localStorage.setItem(
+            "zain_chat_session",
+            sessionId
+        );
+    }
+
+
+    /* =========================================
+       OPEN CHATBOT
+    ========================================= */
+
+    chatbotToggle.addEventListener("click", () => {
+
+        chatbotBox.classList.add("active");
+
+        chatbotBox.setAttribute(
+            "aria-hidden",
+            "false"
+        );
+
+        setTimeout(() => {
+            chatbotInput.focus();
+        }, 250);
+
+    });
+
+
+    /* =========================================
+       CLOSE CHATBOT
+    ========================================= */
+
+    chatbotClose.addEventListener("click", () => {
+
+        chatbotBox.classList.remove("active");
+
+        chatbotBox.setAttribute(
+            "aria-hidden",
+            "true"
+        );
+
+    });
+
+
+    /* =========================================
+       SEND MESSAGE
+    ========================================= */
+
+    async function handleSendMessage(message = null) {
+
+        const text =
+            message !== null
+                ? message.trim()
+                : chatbotInput.value.trim();
+
+
+        // Don't send empty messages
+        if (!text) return;
+
+
+        // Clear input
+        chatbotInput.value = "";
+
+
+        // Add user's message
+        addUserMessage(text);
+
+
+        // Scroll to bottom
+        scrollChat();
+
+
+        // Show typing indicator
+        const typingElement =
+            showTypingIndicator();
+
+
+        try {
+
+            // Send message to n8n
+            const reply =
+                await sendMessageToBot(
+                    text,
+                    sessionId
+                );
+
+
+            // Remove typing indicator
+            removeTypingIndicator(
+                typingElement
+            );
+
+
+            // Show bot response
+            addBotMessage(reply);
+
+
+            // Scroll again
+            scrollChat();
+
+
+        } catch (error) {
+
+            console.error(
+                "Chatbot error:",
+                error
+            );
+
+
+            removeTypingIndicator(
+                typingElement
+            );
+
+
+            addBotMessage(
+                "Maazrat, abhi connection mein masla aa raha hai. Please thori der baad try karein."
+            );
+
+        }
+
+    }
+
+
+    /* =========================================
+       SEND BUTTON
+    ========================================= */
+
+    chatbotSend.addEventListener(
+        "click",
+        () => {
+            handleSendMessage();
+        }
+    );
+
+
+    /* =========================================
+       ENTER KEY
+    ========================================= */
+
+    chatbotInput.addEventListener(
+        "keydown",
+        (event) => {
+
+            if (
+                event.key === "Enter" &&
+                !event.shiftKey
+            ) {
+
+                event.preventDefault();
+
+                handleSendMessage();
+
+            }
+
+        }
+    );
+
+
+    /* =========================================
+       QUICK SUGGESTIONS
+    ========================================= */
+
+    suggestions.forEach(
+        (button) => {
+
+            button.addEventListener(
+                "click",
+                () => {
+
+                    const message =
+                        button.dataset.message;
+
+                    handleSendMessage(
+                        message
+                    );
+
+                }
+            );
+
+        }
+    );
+
+
+    /* =========================================
+       ADD USER MESSAGE
+    ========================================= */
+
+    function addUserMessage(text) {
+
+        const wrapper =
+            document.createElement("div");
+
+        wrapper.className =
+            "chat-message user-message-wrapper";
+
+
+        const message =
+            document.createElement("div");
+
+        message.className =
+            "user-message";
+
+
+        message.textContent = text;
+
+
+        wrapper.appendChild(message);
+
+
+        chatbotMessages.appendChild(
+            wrapper
+        );
+
+    }
+
+
+    /* =========================================
+       ADD BOT MESSAGE
+    ========================================= */
+
+    function addBotMessage(text) {
+
+        const wrapper =
+            document.createElement("div");
+
+        wrapper.className =
+            "chat-message bot-message-wrapper";
+
+
+        const avatar =
+            document.createElement("div");
+
+        avatar.className =
+            "message-avatar";
+
+        avatar.textContent = "Z";
+
+
+        const content =
+            document.createElement("div");
+
+        content.className =
+            "message-content";
+
+
+        const sender =
+            document.createElement("div");
+
+        sender.className =
+            "message-sender";
+
+        sender.textContent =
+            "AI Assistant";
+
+
+        const message =
+            document.createElement("div");
+
+        message.className =
+            "bot-message";
+
+        message.textContent =
+            text;
+
+
+        const time =
+            document.createElement("div");
+
+        time.className =
+            "message-time";
+
+        time.textContent =
+            "Just now";
+
+
+        content.appendChild(sender);
+        content.appendChild(message);
+        content.appendChild(time);
+
+
+        wrapper.appendChild(avatar);
+        wrapper.appendChild(content);
+
+
+        chatbotMessages.appendChild(
+            wrapper
+        );
+
+    }
+
+
+    /* =========================================
+       TYPING INDICATOR
+    ========================================= */
+
+    function showTypingIndicator() {
+
+        const wrapper =
+            document.createElement("div");
+
+        wrapper.className =
+            "chat-message bot-message-wrapper";
+
+
+        const avatar =
+            document.createElement("div");
+
+        avatar.className =
+            "message-avatar";
+
+        avatar.textContent = "Z";
+
+
+        const content =
+            document.createElement("div");
+
+        content.className =
+            "message-content";
+
+
+        const typing =
+            document.createElement("div");
+
+        typing.className =
+            "bot-message typing-indicator";
+
+
+        typing.innerHTML = `
+            <span></span>
+            <span></span>
+            <span></span>
+        `;
+
+
+        content.appendChild(typing);
+
+        wrapper.appendChild(avatar);
+        wrapper.appendChild(content);
+
+        chatbotMessages.appendChild(
+            wrapper
+        );
+
+
+        scrollChat();
+
+
+        return wrapper;
+
+    }
+
+
+    /* =========================================
+       REMOVE TYPING INDICATOR
+    ========================================= */
+
+    function removeTypingIndicator(
+        element
+    ) {
+
+        if (
+            element &&
+            element.parentNode
+        ) {
+
+            element.remove();
+
+        }
+
+    }
+
+
+    /* =========================================
+       AUTO SCROLL
+    ========================================= */
+
+    function scrollChat() {
+
+        setTimeout(() => {
+
+            chatbotMessages.scrollTop =
+                chatbotMessages.scrollHeight;
+
+        }, 50);
+
+    }
+
+
+    /* =========================================
+       ESCAPE KEY
+    ========================================= */
+
+    document.addEventListener(
+        "keydown",
+        (event) => {
+
+            if (
+                event.key === "Escape" &&
+                chatbotBox.classList.contains(
+                    "active"
+                )
+            ) {
+
+                chatbotBox.classList.remove(
+                    "active"
+                );
+
+                chatbotBox.setAttribute(
+                    "aria-hidden",
+                    "true"
+                );
+
+            }
+
+        }
+    );
+
+});
